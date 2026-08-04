@@ -309,8 +309,8 @@ function createStockCard(holding) {
       data-id="${holding.id}"
       style="--glow:${
         isLoss
-          ? "var(--red)"
-          : "var(--green)"
+          ? "var(--green)"
+          : "var(--red)"
       }"
     >
       <div class="card-top">
@@ -515,8 +515,8 @@ function createStockCard(holding) {
           labels,
           datasets: [{
             data: prices,
-            borderColor: isUp ? "#38f29a" : "#ff385c",
-            backgroundColor: isUp ? "rgba(56,242,154,.12)" : "rgba(255,56,92,.12)",
+            borderColor: isUp ? "#ff385c" : "#38f29a",
+            backgroundColor: isUp ? "rgba(255,56,92,.12)" : "rgba(56,242,154,.12)",
             fill: true,
             borderWidth: 2,
             pointRadius: 0,
@@ -676,22 +676,22 @@ if (currentValueElement) {
   if (isUp) {
     gradient.addColorStop(
       0,
-      "rgba(56,242,154,.32)"
-    );
-
-    gradient.addColorStop(
-      1,
-      "rgba(56,242,154,0)"
-    );
-  } else {
-    gradient.addColorStop(
-      0,
       "rgba(255,56,92,.32)"
     );
 
     gradient.addColorStop(
       1,
       "rgba(255,56,92,0)"
+    );
+  } else {
+    gradient.addColorStop(
+      0,
+      "rgba(56,242,154,.32)"
+    );
+
+    gradient.addColorStop(
+      1,
+      "rgba(56,242,154,0)"
     );
   }
 
@@ -709,8 +709,8 @@ if (currentValueElement) {
 
             borderColor:
               isUp
-                ? "#38f29a"
-                : "#ff385c",
+                ? "#ff385c"
+                : "#38f29a",
 
             backgroundColor:
               gradient,
