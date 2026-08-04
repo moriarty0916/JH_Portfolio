@@ -2,8 +2,6 @@ window.APP_CONFIG = {
   refreshSeconds: 60,
   // Yahoo 行情代理（部署本專案 worker 後可一併改為同一網址）
   workerUrl: "https://lucky-rice-01c0.jimmydog0423.workers.dev",
-  // 中離統計 API（部署 worker/ 後填入，例如 https://jh-portfolio-api.xxxxx.workers.dev）
-  prayApiUrl: "",
 
   socialLinks: [],
 

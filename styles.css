@@ -343,9 +343,9 @@
   align-items: center;
   gap: 12px;
 
-  min-width: 230px;
-  min-height: 86px;
-  padding: 10px 16px 10px 10px;
+  min-width: auto;
+  min-height: auto;
+  padding: 8px 16px 8px 8px;
 
   color: #ffffff;
   border: 1px solid rgba(255, 199, 92, 0.62);
