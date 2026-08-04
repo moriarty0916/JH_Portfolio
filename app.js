@@ -1544,8 +1544,54 @@ function createMrvlParticles() {
   );
 
   /* =========================
-   中離統計 API
+   中離統計（API 或本地備援）
 ========================= */
+const PRAY_STATS_KEY = "xianChungLiStats";
+
+function getLocalPrayStats() {
+  try {
+    const raw = localStorage.getItem(PRAY_STATS_KEY);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (error) {
+    console.warn("讀取中離統計失敗：", error);
+  }
+
+  return {
+    totalCount: 0,
+    totalVisitors: 0,
+    visitorIds: []
+  };
+}
+
+function saveLocalPrayStats(stats) {
+  localStorage.setItem(
+    PRAY_STATS_KEY,
+    JSON.stringify(stats)
+  );
+}
+
+function recordLocalPray() {
+  const stats = getLocalPrayStats();
+  const visitorId = getPrayVisitorId();
+
+  stats.totalCount += 1;
+
+  if (!stats.visitorIds.includes(visitorId)) {
+    stats.visitorIds.push(visitorId);
+  }
+
+  stats.totalVisitors = stats.visitorIds.length;
+  saveLocalPrayStats(stats);
+
+  return {
+    success: true,
+    totalCount: stats.totalCount,
+    totalVisitors: stats.totalVisitors
+  };
+}
+
 function updatePrayStatsDisplay(stats) {
   const visitorCountElement =
     document.querySelector(
@@ -1610,10 +1656,7 @@ async function loadPrayStats() {
     );
 
   if (!C.prayApiUrl) {
-    updatePrayStatsDisplay({
-      totalCount: 0,
-      totalVisitors: 0
-    });
+    updatePrayStatsDisplay(getLocalPrayStats());
     return;
   }
 
@@ -1666,11 +1709,9 @@ async function loadPrayStats() {
 }
 async function recordPray() {
   if (!C.prayApiUrl) {
-    return {
-      success: true,
-      totalCount: 0,
-      totalVisitors: 0
-    };
+    const result = recordLocalPray();
+    updatePrayStatsDisplay(result);
+    return result;
   }
 
   const response = await fetch(
