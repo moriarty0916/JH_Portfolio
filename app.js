@@ -3,7 +3,6 @@
 
   const C = window.APP_CONFIG;
   if (!C) throw new Error("找不到 APP_CONFIG，請確認 config.js 已正確載入。");
-  const PRAY_API_URL = C.workerUrl;
   const state = {
     prices: Object.fromEntries(
       C.holdings.map(h => [
@@ -1545,7 +1544,7 @@ function createMrvlParticles() {
   );
 
   /* =========================
-   燒香拜拜動畫
+   中離統計 API
 ========================= */
 function updatePrayStatsDisplay(stats) {
   const visitorCountElement =
@@ -1567,14 +1566,14 @@ function updatePrayStatsDisplay(stats) {
 
   if (totalCountElement) {
     totalCountElement.textContent =
-      `累積香火 ${Number(
+      `累積中離 ${Number(
         stats?.totalCount || 0
       ).toLocaleString("zh-TW")} 次`;
   }
 }
   function getPrayVisitorId() {
   const storageKey =
-    "rogerPrayVisitorId";
+    "xianChungLiVisitorId";
 
   let visitorId =
     localStorage.getItem(storageKey);
@@ -1610,6 +1609,14 @@ async function loadPrayStats() {
       "#prayVisitorCount"
     );
 
+  if (!C.prayApiUrl) {
+    updatePrayStatsDisplay({
+      totalCount: 0,
+      totalVisitors: 0
+    });
+    return;
+  }
+
   try {
     const visitorId =
       encodeURIComponent(
@@ -1617,7 +1624,7 @@ async function loadPrayStats() {
       );
 
     const response = await fetch(
-      `${PRAY_API_URL}/pray/stats?visitorId=${visitorId}`,
+      `${C.prayApiUrl}/pray/stats?visitorId=${visitorId}`,
       {
         cache: "no-store",
         headers: {
@@ -1635,16 +1642,21 @@ async function loadPrayStats() {
     ) {
       throw new Error(
         result?.message ||
-        "無法取得上香統計"
+        "無法取得中離統計"
       );
     }
 
     updatePrayStatsDisplay(result);
   } catch (error) {
     console.error(
-      "取得上香統計失敗：",
+      "取得中離統計失敗：",
       error
     );
+
+    updatePrayStatsDisplay({
+      totalCount: 0,
+      totalVisitors: 0
+    });
 
     if (visitorCountElement) {
       visitorCountElement.textContent =
@@ -1653,8 +1665,16 @@ async function loadPrayStats() {
   }
 }
 async function recordPray() {
+  if (!C.prayApiUrl) {
+    return {
+      success: true,
+      totalCount: 0,
+      totalVisitors: 0
+    };
+  }
+
   const response = await fetch(
-    `${PRAY_API_URL}/pray`,
+    `${C.prayApiUrl}/pray`,
     {
       method: "POST",
       headers: {
@@ -1678,7 +1698,7 @@ async function recordPray() {
   ) {
     throw new Error(
       result?.message ||
-      "上香紀錄失敗"
+      "中離紀錄失敗"
     );
   }
 
@@ -1687,12 +1707,10 @@ async function recordPray() {
   return result;
 }
 const PRAY_IMAGES = [
-  "assets/images/pray-1.jpg",
-  "assets/images/pray-2.jpg"
+  "assets/images/chung-li.png"
 ];
 
-const PRAY_MESSAGE =
-  "祝賢哥投資組合早日轉盈，資產穩健成長";
+const PRAY_MESSAGE = "";
 
 let prayAnimationIndex = 0;
 
@@ -1835,7 +1853,7 @@ async function createPrayFloatAnimation() {
 
   image.className = "pray-float-image";
   image.src = getRandomPrayImage();
-  image.alt = "拜拜祈福圖片";
+  image.alt = "中離梗圖";
 
   /*
    * 避免瀏覽器保留破圖。
@@ -1854,14 +1872,16 @@ async function createPrayFloatAnimation() {
     }
   );
 
-  const message =
-    document.createElement("div");
-
-  message.className = "pray-float-text";
-  message.textContent = PRAY_MESSAGE;
-
   item.appendChild(image);
-  item.appendChild(message);
+
+  if (PRAY_MESSAGE) {
+    const message =
+      document.createElement("div");
+
+    message.className = "pray-float-text";
+    message.textContent = PRAY_MESSAGE;
+    item.appendChild(message);
+  }
 
   layer.appendChild(item);
 
@@ -1876,15 +1896,16 @@ async function createPrayFloatAnimation() {
   );
 
   createPraySparkles(button);
+
   try {
     await recordPray();
   } catch (error) {
     console.error(
-      "上香統計失敗：",
+      "中離統計失敗：",
       error
     );
-  
-    toast("上香成功，但人數紀錄失敗");
+
+    toast("中離成功，但人數紀錄失敗");
   }
   /*
    * 讓按鈕重新觸發震動。

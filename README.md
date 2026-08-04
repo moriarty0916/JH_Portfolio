@@ -17,6 +17,10 @@
 
 https://moriarty0916.github.io/JH_Portfolio/
 
+## API Worker
+
+中離統計與行情資料使用本專案自带的 Cloudflare Worker，部署方式見 [`worker/README.md`](worker/README.md)。
+
 ## 本地預覽
 
 ```bash

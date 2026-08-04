@@ -618,13 +618,15 @@
 .pray-float-image {
   display: block;
 
-  width: clamp(120px, 18vw, 220px);
-  height: clamp(120px, 18vw, 220px);
+  width: clamp(280px, 72vw, 640px);
+  height: auto;
+  max-height: clamp(160px, 38vw, 320px);
+  aspect-ratio: 1024 / 498;
 
-  object-fit: cover;
+  object-fit: contain;
 
   border: 4px solid rgba(255, 220, 135, 0.95);
-  border-radius: 28px;
+  border-radius: 20px;
 
   background: rgba(0, 0, 0, 0.85);
 
