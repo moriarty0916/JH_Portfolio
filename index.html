@@ -124,6 +124,26 @@
         <small id="countdown">60 秒後自動更新</small>
       </article>
     </section>
+
+    <section class="summary-grid margin-summary-grid">
+      <article class="summary-card">
+        <span>借貸總金額</span>
+        <strong id="totalLoan">—</strong>
+        <small>融資 / 借貸本金</small>
+      </article>
+
+      <article class="summary-card" id="maintenanceCard">
+        <span>維持率</span>
+        <strong id="maintenanceRatio">—</strong>
+        <small id="maintenanceHint">總市值 ÷ 借貸金額</small>
+      </article>
+
+      <article class="summary-card" id="netAssetCard">
+        <span>淨資產</span>
+        <strong id="netAssets">—</strong>
+        <small>總市值 − 借貸總金額</small>
+      </article>
+    </section>
     <section class="total-chart-section">
       <div class="total-chart-head">
         <div>
@@ -355,6 +375,16 @@
           <div>
             <span>淨變動（自最初）</span>
             <strong>+157,458 元 (+2.75%)</strong>
+          </div>
+
+          <div>
+            <span>借貸總金額</span>
+            <strong>3,217,281 元</strong>
+          </div>
+
+          <div>
+            <span>目前淨資產</span>
+            <strong id="summaryNetAssets">—</strong>
           </div>
 
           <div>

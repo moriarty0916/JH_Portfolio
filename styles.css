@@ -1457,3 +1457,14 @@ body.roger-modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+.margin-summary-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .margin-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

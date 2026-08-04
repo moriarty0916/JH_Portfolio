@@ -118,6 +118,77 @@
       money(totalValue, "TWD");
   }
 
+  const totalLoan = Number(C.totalLoan) || 0;
+  const netAssets = totalValue - totalLoan;
+  const maintenanceRatio = totalLoan
+    ? (totalValue / totalLoan) * 100
+    : 0;
+
+  const totalLoanElement =
+    document.querySelector("#totalLoan");
+  const maintenanceRatioElement =
+    document.querySelector("#maintenanceRatio");
+  const maintenanceHintElement =
+    document.querySelector("#maintenanceHint");
+  const netAssetsElement =
+    document.querySelector("#netAssets");
+  const maintenanceCard =
+    document.querySelector("#maintenanceCard");
+  const netAssetCard =
+    document.querySelector("#netAssetCard");
+
+  if (totalLoanElement) {
+    totalLoanElement.textContent =
+      money(totalLoan, "TWD");
+  }
+
+  if (maintenanceRatioElement) {
+    maintenanceRatioElement.textContent =
+      `${num(maintenanceRatio, 2)}%`;
+  }
+
+  if (maintenanceHintElement) {
+    maintenanceHintElement.textContent =
+      maintenanceRatio >= 130
+        ? "維持率 ≥ 130%，尚屬安全"
+        : "維持率低於 130%，注意追繳";
+  }
+
+  if (netAssetsElement) {
+    netAssetsElement.textContent =
+      money(netAssets, "TWD");
+  }
+
+  const summaryNetAssetsElement =
+    document.querySelector("#summaryNetAssets");
+
+  if (summaryNetAssetsElement) {
+    summaryNetAssetsElement.textContent =
+      money(netAssets, "TWD");
+  }
+
+  if (maintenanceCard) {
+    maintenanceCard.classList.toggle(
+      "profit",
+      maintenanceRatio >= 130
+    );
+    maintenanceCard.classList.toggle(
+      "loss",
+      maintenanceRatio < 130
+    );
+  }
+
+  if (netAssetCard) {
+    netAssetCard.classList.toggle(
+      "profit",
+      netAssets >= 0
+    );
+    netAssetCard.classList.toggle(
+      "loss",
+      netAssets < 0
+    );
+  }
+
   const totalCard =
     document.querySelector(".summary-card.total");
 
