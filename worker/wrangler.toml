@@ -5,4 +5,4 @@ compatibility_date = "2024-08-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "jh-portfolio-chungli-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "717ce1c7-10ed-4684-b5dd-26f3ba4d95cd"
