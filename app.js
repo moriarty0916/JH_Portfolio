@@ -37,10 +37,19 @@
   const money = (value, currency = "TWD") => new Intl.NumberFormat("zh-TW", {
     style: "currency",
     currency,
-    maximumFractionDigits: currency === "TWD" ? 0 : 2
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(Number(value) || 0);
-  const num = value => new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 2 }).format(Number(value) || 0);
+  const num = (value, fractionDigits = 2) => new Intl.NumberFormat("zh-TW", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits
+  }).format(Number(value) || 0);
+  const qty = value => new Intl.NumberFormat("zh-TW", {
+    maximumFractionDigits: 0
+  }).format(Number(value) || 0);
   const signed = value => `${value >= 0 ? "+" : "-"}${money(Math.abs(value), "TWD")}`;
+  const signedPercent = value =>
+    `${value >= 0 ? "+" : ""}${num(value, 2)}%`;
 
   function holdingData(h) {
     const price = Number(state.prices[h.id] ?? h.fallbackPrice);
@@ -89,8 +98,7 @@
 
   if (totalPnlPercentElement) {
     totalPnlPercentElement.textContent =
-      `${totalPercent >= 0 ? "+" : ""}` +
-      `${totalPercent.toFixed(2)}%`;
+      signedPercent(totalPercent);
   }
 
   if (totalCostElement) {
@@ -209,6 +217,10 @@ function createStockCard(holding) {
   const priceDifference =
     holding.price - holding.cost;
 
+  const returnPercent = holding.cost
+    ? (priceDifference / holding.cost) * 100
+    : 0;
+
   const statusText =
     holding.market === "MANUAL"
       ? "手動估值"
@@ -258,7 +270,7 @@ function createStockCard(holding) {
 
       <div class="card-stats">
         <div class="stat">
-          <span>入場成本</span>
+          <span>買進均價</span>
 
           <b>
             ${money(
@@ -272,7 +284,23 @@ function createStockCard(holding) {
           <span>持有數量</span>
 
           <b>
-            ${num(holding.qty)} 股
+            ${qty(holding.qty)} 股
+          </b>
+        </div>
+
+        <div class="stat">
+          <span>總投入成本</span>
+
+          <b>
+            ${money(holding.costTwd, "TWD")}
+          </b>
+        </div>
+
+        <div class="stat">
+          <span>最新市值</span>
+
+          <b>
+            ${money(holding.valueTwd, "TWD")}
           </b>
         </div>
 
@@ -308,6 +336,7 @@ function createStockCard(holding) {
 
         <small>
           約 ${signed(holding.pnlTwd)}
+          · ${signedPercent(returnPercent)}
         </small>
       </div>
 
@@ -362,7 +391,9 @@ function createStockCard(holding) {
 
   if (worstPnl) {
     worstPnl.textContent =
-      signed(worst.pnlTwd);
+      `${signed(worst.pnlTwd)} · ${signedPercent(
+        worst.cost ? ((worst.price - worst.cost) / worst.cost) * 100 : 0
+      )}`;
   }
 
   if (bestHolding) {
@@ -372,7 +403,9 @@ function createStockCard(holding) {
 
   if (bestPnl) {
     bestPnl.textContent =
-      signed(best.pnlTwd);
+      `${signed(best.pnlTwd)} · ${signedPercent(
+        best.cost ? ((best.price - best.cost) / best.cost) * 100 : 0
+      )}`;
   }
 }
 
