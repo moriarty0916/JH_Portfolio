@@ -50,7 +50,7 @@
       <h1>賢哥總資產戰情室</h1>
 
       <p class="subtitle">
-        台股 ETF 投資組合 · 每 60 秒更新 · 互動音效與損益爆擊
+        台股 ETF 投資組合 · 每 60 秒更新 · 互動音效與金句爆擊
       </p>
     </div>
 
@@ -75,7 +75,7 @@
         class="btn danger"
         type="button"
       >
-        損益大爆擊
+        金句大爆擊
       </button>
 
       <button
@@ -288,6 +288,12 @@
       <span class="pray-title">
         點我中離
       </span>
+      <span class="pray-visitor-row">
+        已有 <strong id="prayVisitorCount">—</strong> 人中離
+      </span>
+      <span class="pray-total-count">
+        累積中離 <strong id="prayTotalCount">—</strong> 次
+      </span>
     </span>
   </button>
 </div>
@@ -397,6 +403,13 @@
     </div>
   </section>
 </div>
+  <div
+    id="goldenQuoteAlert"
+    class="golden-quote-alert"
+    aria-live="polite"
+    hidden
+  ></div>
+
   <div
     id="toast"
     class="toast"

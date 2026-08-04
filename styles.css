@@ -464,6 +464,11 @@
   font-size: 12px;
 }
 
+.pray-total-count strong {
+  color: #ffb84d;
+  font-weight: 800;
+}
+
 /* 點擊時整張資訊卡震動 */
 
 .pray-fixed-button.is-praying {
@@ -1467,4 +1472,50 @@ body.roger-modal-open {
   .margin-summary-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.golden-quote-alert {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+.golden-quote-alert[hidden] {
+  display: none;
+}
+
+.golden-quote-alert__card {
+  max-width: min(92vw, 620px);
+  padding: 24px 30px;
+  border: 1px solid rgba(255, 199, 92, 0.72);
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(35, 17, 42, 0.96),
+      rgba(13, 17, 31, 0.96)
+    );
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.55),
+    0 0 28px rgba(255, 167, 64, 0.28);
+  color: #ffffff;
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.55;
+  text-align: center;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  transform: scale(0.86);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.golden-quote-alert.show .golden-quote-alert__card {
+  opacity: 1;
+  transform: scale(1);
 }

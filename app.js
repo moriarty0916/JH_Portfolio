@@ -1316,6 +1316,31 @@ function normalizeHistory(history) {
     el._timer = setTimeout(() => el.classList.remove("show"), 2600);
   }
 
+  function showGoldenQuoteAlert(text, duration = 5200) {
+    const alertLayer = document.querySelector("#goldenQuoteAlert");
+
+    if (!alertLayer) {
+      return;
+    }
+
+    const card = document.createElement("div");
+    card.className = "golden-quote-alert__card";
+    card.textContent = text;
+
+    alertLayer.replaceChildren(card);
+    alertLayer.hidden = false;
+
+    alertLayer.classList.remove("show");
+    void alertLayer.offsetWidth;
+    alertLayer.classList.add("show");
+
+    clearTimeout(alertLayer._timer);
+    alertLayer._timer = window.setTimeout(() => {
+      alertLayer.classList.remove("show");
+      alertLayer.hidden = true;
+    }, duration);
+  }
+
   function playTone(type = "soft") {
     if (!state.sound) return;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1547,6 +1572,41 @@ function createMrvlParticles() {
   }
 }
 
+const GOLDEN_QUOTES = [
+  "有沒有可能 金窩",
+  "你又知道我沒買 我買不一定要在我名下啊靠北喔",
+  "邏輯上沒問題",
+  "我",
+  "狗頭爸爸辛苦了",
+  "狗頭都被你們鬧到進醫院了 幹",
+  "你們要不要先去搞懂什麼是透天",
+  "和看不懂中文的說話真的很累",
+  "如果降息4碼 我今年年薪299",
+  "我跟我身邊的朋友都覺得摩斯很貴 可能是我們太窮了吧",
+  "收起玩心考一個中央碩而已",
+  "早就超過3年很多了（2年11個月）",
+  "你是不是很自卑很無聊壓",
+  "狗頭爸爸辛苦了 好希望我能跟狗頭爸爸一樣強",
+  "我pr應該比YJ高吧",
+  "我要這麼努力 還要被說PR30",
+  "阿伯真的超級無敵壞",
+  "我是資訊家族",
+  "我爸228躲到林家花園",
+  "我要告 是我律師跟警察朋友叫我別告",
+  "算了我跳下去好了",
+  "都是長泉害我失去心愛的女人",
+  "我剛跟老闆開會 他請我幫忙規劃",
+  "認識你們五個真倒楣",
+  "滾 請你滾",
+  "你嗎的裁培調未來"
+];
+
+function getRandomGoldenQuote() {
+  return GOLDEN_QUOTES[
+    Math.floor(Math.random() * GOLDEN_QUOTES.length)
+  ];
+}
+
   function chaos() {
     document.body.classList.add("screen-flash");
     setTimeout(() => document.body.classList.remove("screen-flash"), 450);
@@ -1557,9 +1617,7 @@ function createMrvlParticles() {
       }, i * 55);
     });
     burst(innerWidth / 2, innerHeight / 2, 60);
-    playTone("chaos");
-    playRandomMp3();
-    toast("全資產損益大爆擊");
+    showGoldenQuoteAlert(getRandomGoldenQuote());
   }
 
   function renderSocials() {
@@ -1621,6 +1679,84 @@ const PRAY_IMAGES = [
 const PRAY_MESSAGE = "";
 
 let prayAnimationIndex = 0;
+
+function getPrayVisitorId() {
+  const storageKey = "jh_portfolio_visitor_id";
+  let visitorId = localStorage.getItem(storageKey);
+
+  if (!visitorId) {
+    visitorId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(storageKey, visitorId);
+  }
+
+  return visitorId;
+}
+
+function renderPrayStats(stats) {
+  const visitorsElement =
+    document.querySelector("#prayVisitorCount");
+  const totalElement =
+    document.querySelector("#prayTotalCount");
+
+  if (visitorsElement && stats?.totalVisitors != null) {
+    visitorsElement.textContent = Number(stats.totalVisitors).toLocaleString("zh-TW");
+  }
+
+  if (totalElement && stats?.totalCount != null) {
+    totalElement.textContent = Number(stats.totalCount).toLocaleString("zh-TW");
+  }
+}
+
+async function fetchPrayStats() {
+  const visitorId = getPrayVisitorId();
+  const url =
+    `${C.workerUrl}/pray/stats?visitorId=${encodeURIComponent(visitorId)}`;
+
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: { Accept: "application/json" }
+  });
+
+  if (!response.ok) {
+    throw new Error(`統計 API 回傳 HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (!result?.success) {
+    throw new Error(result?.message || "無法取得中離統計");
+  }
+
+  renderPrayStats(result);
+  return result;
+}
+
+async function recordPrayEvent() {
+  const visitorId = getPrayVisitorId();
+  const response = await fetch(`${C.workerUrl}/pray`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ visitorId })
+  });
+
+  if (!response.ok) {
+    throw new Error(`中離 API 回傳 HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (!result?.success) {
+    throw new Error(result?.message || "無法記錄中離");
+  }
+
+  renderPrayStats(result);
+  return result;
+}
 
 function getRandomPrayImage() {
   const randomIndex = Math.floor(
@@ -1834,9 +1970,21 @@ function setupPrayAnimation() {
     return;
   }
 
+  fetchPrayStats().catch(error => {
+    console.warn("無法載入中離統計：", error.message);
+  });
+
   button.addEventListener(
     "click",
-    createPrayFloatAnimation
+    async () => {
+      createPrayFloatAnimation();
+
+      try {
+        await recordPrayEvent();
+      } catch (error) {
+        console.warn("無法更新中離統計：", error.message);
+      }
+    }
   );
 }
 function setupRogerAboutModal() {
