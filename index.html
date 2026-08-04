@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#100b1f" />
+
+  <title>賢哥總資產戰情室</title>
+
+  <link rel="icon" href="data:," />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script
+  src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+  ></script>
+</head>
+
+<body>
+  <div class="noise"></div>
+  <div id="particles" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div>
+      <div class="live-row">
+        <span class="live-dot"></span>
+        <span>LIVE PORTFOLIO ARENA</span>
+      </div>
+
+      <h1>賢哥總資產戰情室</h1>
+
+      <p class="subtitle">
+        台股 ETF 投資組合 · 每 60 秒更新 · 互動音效與損益爆擊
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <button
+        id="aboutRogerBtn"
+        class="btn about-roger-btn"
+        type="button"
+      >
+        投資組合摘要
+      </button>
+      <button
+        id="refreshBtn"
+        class="btn primary"
+        type="button"
+      >
+        立即更新
+      </button>
+
+      <button
+        id="chaosBtn"
+        class="btn danger"
+        type="button"
+      >
+        損益大爆擊
+      </button>
+
+      <button
+        id="soundBtn"
+        class="btn ghost"
+        type="button"
+        aria-pressed="true"
+      >
+        音效：開
+      </button>
+
+      <button
+        id="autoRefreshBtn"
+        class="btn ghost"
+        type="button"
+        aria-pressed="true"
+      >
+        自動更新：開
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary-grid">
+      <article class="summary-card total">
+        <span>目前總損益</span>
+        <strong id="totalPnl">計算中…</strong>
+        <small id="totalPnlPct">—</small>
+      </article>
+
+      <article class="summary-card">
+        <span>總投入成本</span>
+        <strong id="totalCost">—</strong>
+        <small>台幣估算</small>
+      </article>
+
+      <article class="summary-card">
+        <span>目前總市值</span>
+        <strong id="summaryPortfolioValue">—</strong>
+        <small>台幣估算</small>
+      </article>
+
+      <article class="summary-card">
+        <span>更新時間</span>
+        <strong id="updatedAt">尚未更新</strong>
+        <small id="countdown">60 秒後自動更新</small>
+      </article>
+    </section>
+    <section class="total-chart-section">
+      <div class="total-chart-head">
+        <div>
+          <p class="eyebrow">TOTAL ASSET TREND</p>
+          <h2>全資產總市值走勢</h2>
+        </div>
+    
+        <div class="total-chart-value">
+          <span>目前總市值</span>
+          <strong id="currentPortfolioValue">—</strong>
+        </div>
+      </div>
+    
+      <div class="total-chart-wrap">
+        <canvas id="totalPortfolioChart"></canvas>
+      </div>
+    
+      <div class="total-chart-footer">
+        <span id="totalChartStartDate">—</span>
+        <span>資料以新台幣估算</span>
+        <span id="totalChartEndDate">—</span>
+      </div>
+    </section>
+    <section
+      class="ticker-wrap"
+      aria-label="即時跑馬燈"
+    >
+      <div id="ticker" class="ticker"></div>
+    </section>
+
+    <section class="rank-grid">
+      <article class="rank-card">
+        <span>目前最大虧損</span>
+        <strong id="worstHolding">—</strong>
+        <small id="worstPnl">—</small>
+      </article>
+
+      <article class="rank-card">
+        <span>目前最佳表現</span>
+        <strong id="bestHolding">—</strong>
+        <small id="bestPnl">—</small>
+      </article>
+
+      <article class="rank-card status-card">
+        <span>行情連線狀態</span>
+        <strong id="apiStatus">準備連線</strong>
+        <small id="apiDetail">
+          Cloudflare Worker + Yahoo Finance
+        </small>
+      </article>
+    </section>
+
+    <!-- 台股區 -->
+    <section class="market-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">TAIWAN MARKET</p>
+          <h2>台股持倉</h2>
+        </div>
+
+        <p>台灣市場持有股票與 ETF</p>
+      </div>
+
+      <section
+        id="twPortfolio"
+        class="portfolio-grid"
+        aria-live="polite"
+      ></section>
+    </section>
+
+    <section class="links-section">
+      <div>
+        <p class="eyebrow">PERFORMANCE INSIGHTS</p>
+        <h2>績效觀察要點</h2>
+      </div>
+
+      <div class="social-links portfolio-insights">
+        <article class="insight-card">
+          <strong>台股主動部位大放異彩</strong>
+          <p>00981A 自最初記錄以來表現強勢，收盤價由 26.45 元升至 31.32 元，單檔獲利由 +2.1 萬膨脹至 +30.9 萬元，是整體回血的最大功臣。</p>
+        </article>
+        <article class="insight-card">
+          <strong>債券部位築底盤整</strong>
+          <p>長天期美債（00687B、00795B）因國際利差與殖利率震盪，帳面潛在虧損較最初有所擴大，但近幾日已在現價位逐步止跌築底。</p>
+        </article>
+        <article class="insight-card">
+          <strong>資產配置防禦網見效</strong>
+          <p>台股主動部位成功抵銷美債下跌衝擊，整體虧損從 -251,671 元縮減至 -94,213 元，已追回 15.7 萬元資產價值。</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>
+      資料僅供娛樂展示，不構成投資建議。
+    </span>
+
+    <strong>賢哥總資產戰情室 · 資料基準日 2026/07/08</strong>
+  </footer>
+  <div
+  id="mrvlEffect"
+  class="mrvl-effect"
+  aria-hidden="true"
+>
+  <div class="mrvl-effect-backdrop"></div>
+
+  <div class="mrvl-effect-content">
+    <div class="mrvl-effect-flash"></div>
+
+    <img
+      id="mrvlEffectImage"
+      src="assets/images/mrvl-effect.png"
+      alt="MRVL 特效圖片"
+    />
+
+    <div class="mrvl-effect-title">
+      MRVL 爆擊
+    </div>
+
+    <div class="mrvl-effect-subtitle">
+      邁威爾專屬事件觸發
+    </div>
+  </div>
+</div>
+  <!-- 燒香拜拜按鈕 -->
+  <div class="pray-fixed-area">
+  <button
+    id="prayFloatingBtn"
+    class="pray-fixed-button"
+    type="button"
+    aria-label="上香祈福"
+  >
+    <span class="pray-icon-box">
+      <img
+        src="assets/images/incense.png"
+        alt=""
+      />
+    </span>
+
+    <span class="pray-info">
+      <span class="pray-title">
+        點我上香
+      </span>
+
+      <span class="pray-visitor-row">
+        已有
+        <strong id="prayVisitorCount">0</strong>
+        人上香
+      </span>
+
+      <span
+        id="prayTotalCount"
+        class="pray-total-count"
+      >
+        累積香火 0 次
+      </span>
+    </span>
+  </button>
+</div>
+
+  <!-- 拜拜動畫產生區 -->
+  <div
+    id="prayAnimationLayer"
+    class="pray-animation-layer"
+    aria-hidden="true"
+></div>
+
+  <!-- 投資組合摘要視窗 -->
+<div
+  id="aboutRogerModal"
+  class="roger-modal"
+  aria-hidden="true"
+>
+  <div
+    class="roger-modal-backdrop"
+    data-close-roger-modal
+  ></div>
+
+  <section
+    class="roger-modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="aboutRogerTitle"
+  >
+    <button
+      id="closeAboutRogerBtn"
+      class="roger-modal-close"
+      type="button"
+      aria-label="關閉視窗"
+    >
+      ×
+    </button>
+
+    <div class="roger-about-layout">
+
+      <div class="roger-photo-area">
+        <div class="portfolio-summary-badge">
+          <span>投資組合</span>
+          <strong>賢哥</strong>
+        </div>
+
+        <div class="roger-photo-caption">
+          <span>記錄日期</span>
+          <strong>2026 年 7 月 8 日</strong>
+        </div>
+      </div>
+
+      <div class="roger-introduction">
+        <p class="eyebrow">PORTFOLIO SUMMARY</p>
+
+        <h2 id="aboutRogerTitle">
+          投資組合摘要
+        </h2>
+
+        <p>
+          本報告記錄賢哥投資組合的最初帳面狀態與 2026 年 7 月 8 日收盤後的最新狀態對比。
+          組合以台股 ETF 為主，涵蓋主動式台股、長天期美債與 ESG 投等債等四檔標的。
+        </p>
+
+        <div class="roger-info-list">
+          <div>
+            <span>總投入成本</span>
+            <strong>5,713,889 元</strong>
+          </div>
+
+          <div>
+            <span>最初總市值</span>
+            <strong>5,462,218 元</strong>
+          </div>
+
+          <div>
+            <span>最新總市值 (7/08)</span>
+            <strong>5,619,676 元</strong>
+          </div>
+
+          <div>
+            <span>整體帳面總損益</span>
+            <strong>-94,213 元 (-1.65%)</strong>
+          </div>
+
+          <div>
+            <span>淨變動（自最初）</span>
+            <strong>+157,458 元 (+2.75%)</strong>
+          </div>
+
+          <div>
+            <span>持有標的</span>
+            <strong>00981A · 00687B · 00795B · 00937B</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+  <div
+    id="toast"
+    class="toast"
+    role="status"
+  >
+    
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
