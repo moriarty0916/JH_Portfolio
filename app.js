@@ -1974,9 +1974,16 @@ function setupPrayAnimation() {
     console.warn("無法載入中離統計：", error.message);
   });
 
-  button.addEventListener(
-    "click",
-    async () => {
+  let prayBusy = false;
+
+  async function handlePrayActivate() {
+    if (prayBusy) {
+      return;
+    }
+
+    prayBusy = true;
+
+    try {
       createPrayFloatAnimation();
 
       try {
@@ -1984,8 +1991,21 @@ function setupPrayAnimation() {
       } catch (error) {
         console.warn("無法更新中離統計：", error.message);
       }
+    } finally {
+      window.setTimeout(() => {
+        prayBusy = false;
+      }, 350);
     }
-  );
+  }
+
+  button.addEventListener("pointerup", event => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    event.preventDefault();
+    handlePrayActivate();
+  });
 }
 function setupRogerAboutModal() {
   const aboutButton =

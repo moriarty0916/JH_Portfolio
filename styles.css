@@ -334,7 +334,7 @@
 .pray-fixed-area {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
   z-index: 1200;
 }
 
@@ -346,6 +346,8 @@
   min-width: auto;
   min-height: auto;
   padding: 8px 16px 8px 8px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 
   color: #ffffff;
   border: 1px solid rgba(255, 199, 92, 0.62);
@@ -407,6 +409,7 @@
     );
 
   overflow: hidden;
+  pointer-events: none;
 }
 
 .pray-icon-box img {
@@ -422,6 +425,9 @@
   padding: 0;
 
   transform: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 /* 右側文字 */
@@ -433,6 +439,7 @@
   gap: 3px;
 
   min-width: 0;
+  pointer-events: none;
 }
 
 .pray-title {
@@ -593,6 +600,7 @@
   position: fixed;
   left: 0;
   top: 0;
+  pointer-events: none;
 
   width: min(270px, 48vw);
 
