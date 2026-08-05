@@ -1975,13 +1975,19 @@ function setupPrayAnimation() {
   });
 
   let prayBusy = false;
+  let lastPrayAt = 0;
+  let touchStartX = 0;
+  let touchStartY = 0;
 
   async function handlePrayActivate() {
-    if (prayBusy) {
+    const now = Date.now();
+
+    if (prayBusy || now - lastPrayAt < 400) {
       return;
     }
 
     prayBusy = true;
+    lastPrayAt = now;
 
     try {
       createPrayFloatAnimation();
@@ -1998,12 +2004,48 @@ function setupPrayAnimation() {
     }
   }
 
-  button.addEventListener("pointerup", event => {
-    if (event.pointerType === "mouse" && event.button !== 0) {
+  button.addEventListener(
+    "touchstart",
+    event => {
+      const touch = event.changedTouches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    },
+    { passive: true }
+  );
+
+  button.addEventListener(
+    "touchend",
+    event => {
+      const touch = event.changedTouches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      const movedX = Math.abs(touch.clientX - touchStartX);
+      const movedY = Math.abs(touch.clientY - touchStartY);
+
+      if (movedX > 12 || movedY > 12) {
+        return;
+      }
+
+      event.preventDefault();
+      handlePrayActivate();
+    },
+    { passive: false }
+  );
+
+  button.addEventListener("click", event => {
+    if (Date.now() - lastPrayAt < 500) {
       return;
     }
 
-    event.preventDefault();
     handlePrayActivate();
   });
 }
