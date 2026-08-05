@@ -352,11 +352,12 @@ body {
 .pray-fixed-button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 0;
 
-  min-width: auto;
+  min-width: 168px;
   min-height: auto;
-  padding: 8px 16px 8px 8px;
+  padding: 12px 18px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: rgba(255, 199, 92, 0.25);
   -webkit-appearance: none;
@@ -450,10 +451,12 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  align-items: center;
+  gap: 4px;
 
   min-width: 0;
   pointer-events: none;
+  text-align: center;
 }
 
 .pray-title {
@@ -529,20 +532,9 @@ body {
   }
 
   .pray-fixed-button {
-    min-width: 190px;
-    min-height: 72px;
-    padding: 8px 12px 8px 8px;
-  }
-
-  .pray-icon-box {
-    flex-basis: 54px;
-    width: 54px;
-    height: 54px;
-  }
-
-  .pray-icon-box img {
-    width: 44px;
-    height: 44px;
+    min-width: 160px;
+    min-height: auto;
+    padding: 10px 14px;
   }
 
   .pray-title {
@@ -645,10 +637,9 @@ body {
 .pray-float-image {
   display: block;
 
-  width: clamp(280px, 72vw, 640px);
+  width: clamp(240px, 68vw, 520px);
   height: auto;
-  max-height: clamp(160px, 38vw, 320px);
-  aspect-ratio: 1024 / 498;
+  max-height: clamp(220px, 52vw, 480px);
 
   object-fit: contain;
 
@@ -1511,30 +1502,29 @@ body.roger-modal-open {
 }
 
 .golden-quote-alert__card {
-  max-width: min(92vw, 620px);
-  padding: 24px 30px;
-  border: 1px solid rgba(255, 199, 92, 0.72);
-  border-radius: 20px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(35, 17, 42, 0.96),
-      rgba(13, 17, 31, 0.96)
-    );
+  max-width: min(92vw, 720px);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
   box-shadow:
     0 18px 60px rgba(0, 0, 0, 0.55),
-    0 0 28px rgba(255, 167, 64, 0.28);
-  color: #ffffff;
-  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
-  font-weight: 800;
-  line-height: 1.55;
-  text-align: center;
-  letter-spacing: 0.02em;
+    0 0 28px rgba(255, 167, 64, 0.18);
+  overflow: hidden;
   opacity: 0;
   transform: scale(0.86);
   transition:
     opacity 0.35s ease,
     transform 0.35s ease;
+}
+
+.golden-quote-alert__image {
+  display: block;
+  width: 100%;
+  max-height: min(72vh, 640px);
+  object-fit: contain;
+  border-radius: 16px;
+  background: #ffffff;
 }
 
 .golden-quote-alert.show .golden-quote-alert__card {

@@ -1316,7 +1316,7 @@ function normalizeHistory(history) {
     el._timer = setTimeout(() => el.classList.remove("show"), 2600);
   }
 
-  function showGoldenQuoteAlert(text, duration = 5200) {
+  function showGoldenQuoteAlert(imageSrc, duration = 5200) {
     const alertLayer = document.querySelector("#goldenQuoteAlert");
 
     if (!alertLayer) {
@@ -1325,7 +1325,13 @@ function normalizeHistory(history) {
 
     const card = document.createElement("div");
     card.className = "golden-quote-alert__card";
-    card.textContent = text;
+
+    const image = document.createElement("img");
+    image.className = "golden-quote-alert__image";
+    image.src = imageSrc;
+    image.alt = "佳賢金句";
+    image.draggable = false;
+    card.appendChild(image);
 
     alertLayer.replaceChildren(card);
     alertLayer.hidden = false;
@@ -1572,38 +1578,20 @@ function createMrvlParticles() {
   }
 }
 
-const GOLDEN_QUOTES = [
-  "有沒有可能 金窩",
-  "你又知道我沒買 我買不一定要在我名下啊靠北喔",
-  "邏輯上沒問題",
-  "我",
-  "狗頭爸爸辛苦了",
-  "狗頭都被你們鬧到進醫院了 幹",
-  "你們要不要先去搞懂什麼是透天",
-  "和看不懂中文的說話真的很累",
-  "如果降息4碼 我今年年薪299",
-  "我跟我身邊的朋友都覺得摩斯很貴 可能是我們太窮了吧",
-  "收起玩心考一個中央碩而已",
-  "早就超過3年很多了（2年11個月）",
-  "你是不是很自卑很無聊壓",
-  "狗頭爸爸辛苦了 好希望我能跟狗頭爸爸一樣強",
-  "我pr應該比YJ高吧",
-  "我要這麼努力 還要被說PR30",
-  "阿伯真的超級無敵壞",
-  "我是資訊家族",
-  "我爸228躲到林家花園",
-  "我要告 是我律師跟警察朋友叫我別告",
-  "算了我跳下去好了",
-  "都是長泉害我失去心愛的女人",
-  "我剛跟老闆開會 他請我幫忙規劃",
-  "認識你們五個真倒楣",
-  "滾 請你滾",
-  "你嗎的裁培調未來"
+const GOLDEN_QUOTE_IMAGES = [
+  "assets/images/golden-quotes/quote-01.png",
+  "assets/images/golden-quotes/quote-02.png",
+  "assets/images/golden-quotes/quote-03.png",
+  "assets/images/golden-quotes/quote-04.png",
+  "assets/images/golden-quotes/quote-05.png",
+  "assets/images/golden-quotes/quote-06.png",
+  "assets/images/golden-quotes/quote-07.png",
+  "assets/images/golden-quotes/quote-08.png"
 ];
 
-function getRandomGoldenQuote() {
-  return GOLDEN_QUOTES[
-    Math.floor(Math.random() * GOLDEN_QUOTES.length)
+function getRandomGoldenQuoteImage() {
+  return GOLDEN_QUOTE_IMAGES[
+    Math.floor(Math.random() * GOLDEN_QUOTE_IMAGES.length)
   ];
 }
 
@@ -1617,7 +1605,7 @@ function getRandomGoldenQuote() {
       }, i * 55);
     });
     burst(innerWidth / 2, innerHeight / 2, 60);
-    showGoldenQuoteAlert(getRandomGoldenQuote());
+    showGoldenQuoteAlert(getRandomGoldenQuoteImage());
   }
 
   function renderSocials() {
@@ -1673,7 +1661,7 @@ function getRandomGoldenQuote() {
   );
 
 const PRAY_IMAGES = [
-  "assets/images/chung-li.png"
+  "assets/images/jiaxian-clone.png"
 ];
 
 const PRAY_MESSAGE = "";
@@ -1897,7 +1885,7 @@ async function createPrayFloatAnimation() {
 
   image.className = "pray-float-image";
   image.src = getRandomPrayImage();
-  image.alt = "中離梗圖";
+  image.alt = "佳賢梗圖";
 
   /*
    * 避免瀏覽器保留破圖。
