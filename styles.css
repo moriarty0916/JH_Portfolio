@@ -363,6 +363,9 @@ body {
   -webkit-appearance: none;
   appearance: none;
   font: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 
   color: #ffffff;
   border: 1px solid rgba(255, 199, 92, 0.62);
