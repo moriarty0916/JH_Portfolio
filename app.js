@@ -598,19 +598,14 @@ function createStockCard(holding) {
       formatChartDate(item.time)
     );
 
-  const values =
-    timeline.map(item =>
-      item.totalValueTwd
-    );
-
-  const firstValue =
-    values[0];
-
-  const lastValue =
-    values[values.length - 1];
-
-  const isUp =
-    lastValue >= firstValue;
+  const candles =
+    timeline.map((item, index) => ({
+      x: index,
+      o: item.openTwd,
+      h: item.highTwd,
+      l: item.lowTwd,
+      c: item.totalValueTwd
+    }));
 
  const currentPortfolioValue =
   holdings.reduce(
@@ -662,65 +657,27 @@ if (currentValueElement) {
       );
   }
 
-  const context =
-    canvas.getContext("2d");
-
-  const gradient =
-    context.createLinearGradient(
-      0,
-      0,
-      0,
-      300
-    );
-
-  if (isUp) {
-    gradient.addColorStop(
-      0,
-      "rgba(255,56,92,.32)"
-    );
-
-    gradient.addColorStop(
-      1,
-      "rgba(255,56,92,0)"
-    );
-  } else {
-    gradient.addColorStop(
-      0,
-      "rgba(56,242,154,.32)"
-    );
-
-    gradient.addColorStop(
-      1,
-      "rgba(56,242,154,0)"
-    );
-  }
-
   state.totalChart =
     new Chart(canvas, {
-      type: "line",
+      type: "candlestick",
 
       data: {
-        labels,
-
         datasets: [
           {
             label: "全資產總市值",
-            data: values,
+            data: candles,
 
-            borderColor:
-              isUp
-                ? "#ff385c"
-                : "#38f29a",
+            color: {
+              up: "#ff385c",
+              down: "#38f29a",
+              unchanged: "rgba(255,255,255,.4)"
+            },
 
-            backgroundColor:
-              gradient,
-
-            fill: true,
-            borderWidth: 3,
-            pointRadius: 0,
-            pointHoverRadius: 6,
-            pointHitRadius: 12,
-            tension: 0.25
+            borderColor: {
+              up: "#ff385c",
+              down: "#38f29a",
+              unchanged: "rgba(255,255,255,.4)"
+            }
           }
         ]
       },
@@ -751,37 +708,36 @@ if (currentValueElement) {
                 const index =
                   items[0].dataIndex;
 
-                return formatFullDateTime(
+                return formatFullDate(
                   timeline[index].time
                 );
               },
 
               label(context) {
-                return (
-                  "總市值：" +
-                  money(
-                    context.parsed.y,
-                    "TWD"
-                  )
-                );
+                const raw =
+                  context.raw;
+
+                return [
+                  "開：" + money(raw.o, "TWD"),
+                  "高：" + money(raw.h, "TWD"),
+                  "低：" + money(raw.l, "TWD"),
+                  "收：" + money(raw.c, "TWD")
+                ];
               },
 
               afterLabel(context) {
-                if (
-                  context.dataIndex === 0
-                ) {
+                const index =
+                  context.dataIndex;
+
+                if (index === 0) {
                   return "";
                 }
 
                 const current =
-                  values[
-                    context.dataIndex
-                  ];
+                  timeline[index].totalValueTwd;
 
                 const previous =
-                  values[
-                    context.dataIndex - 1
-                  ];
+                  timeline[index - 1].totalValueTwd;
 
                 const difference =
                   current - previous;
@@ -797,6 +753,10 @@ if (currentValueElement) {
 
         scales: {
           x: {
+            type: "linear",
+            min: 0,
+            max: Math.max(candles.length - 1, 0),
+
             grid: {
               display: false
             },
@@ -808,7 +768,11 @@ if (currentValueElement) {
               maxTicksLimit: 8,
 
               maxRotation: 0,
-              autoSkip: true
+              autoSkip: true,
+
+              callback(value) {
+                return labels[Math.round(value)] ?? "";
+              }
             }
           },
 
@@ -869,6 +833,9 @@ if (currentValueElement) {
 
   for (const time of times) {
     let totalValueTwd = 0;
+    let totalOpenTwd = 0;
+    let totalHighTwd = 0;
+    let totalLowTwd = 0;
     let valid = true;
 
     for (const holding of holdings) {
@@ -884,14 +851,20 @@ if (currentValueElement) {
        * 若時間早於該股票第一筆資料，
        * 使用第一筆歷史價格，而不是目前價格。
        */
-      const historicalPrice =
-        findPriceAtTime(
+      const ohlc =
+        findOhlcAtTime(
           history,
           time,
           currentPrice
         );
 
-      if (!isValidNumber(historicalPrice)) {
+      if (
+        !ohlc ||
+        !isValidNumber(ohlc.close) ||
+        !isValidNumber(ohlc.open) ||
+        !isValidNumber(ohlc.high) ||
+        !isValidNumber(ohlc.low)
+      ) {
         valid = false;
         break;
       }
@@ -907,7 +880,7 @@ if (currentValueElement) {
       }
 
       const holdingValue =
-        historicalPrice *
+        ohlc.close *
         quantity;
 
       if (
@@ -919,6 +892,9 @@ if (currentValueElement) {
       }
 
       totalValueTwd += holdingValue;
+      totalOpenTwd += ohlc.open * quantity;
+      totalHighTwd += ohlc.high * quantity;
+      totalLowTwd += ohlc.low * quantity;
     }
 
     /*
@@ -932,14 +908,17 @@ if (currentValueElement) {
     ) {
       rawTimeline.push({
         time,
-        totalValueTwd
+        totalValueTwd,
+        openTwd: totalOpenTwd,
+        highTwd: totalHighTwd,
+        lowTwd: totalLowTwd
       });
     }
   }
 
   return removePortfolioOutliers(rawTimeline);
 }
-function findPriceAtTime(
+function findOhlcAtTime(
   history,
   timestamp,
   fallbackPrice
@@ -947,10 +926,26 @@ function findPriceAtTime(
   const normalizedHistory =
     normalizeHistory(history);
 
+  const toOhlc = item => ({
+    open: item.open,
+    high: item.high,
+    low: item.low,
+    close: item.price
+  });
+
   if (normalizedHistory.length === 0) {
-    return isValidNumber(fallbackPrice)
-      ? Number(fallbackPrice)
-      : null;
+    if (!isValidNumber(fallbackPrice)) {
+      return null;
+    }
+
+    const price = Number(fallbackPrice);
+
+    return {
+      open: price,
+      high: price,
+      low: price,
+      close: price
+    };
   }
 
   const firstItem =
@@ -969,7 +964,7 @@ function findPriceAtTime(
    * 會產生垂直跳動。
    */
   if (timestamp <= firstItem.time) {
-    return firstItem.price;
+    return toOhlc(firstItem);
   }
 
   /*
@@ -977,14 +972,14 @@ function findPriceAtTime(
    * 延續最後一筆有效價格。
    */
   if (timestamp >= lastItem.time) {
-    return lastItem.price;
+    return toOhlc(lastItem);
   }
 
   let left = 0;
   let right =
     normalizedHistory.length - 1;
 
-  let result = firstItem.price;
+  let result = firstItem;
 
   while (left <= right) {
     const middle =
@@ -994,16 +989,14 @@ function findPriceAtTime(
       normalizedHistory[middle];
 
     if (item.time <= timestamp) {
-      result = item.price;
+      result = item;
       left = middle + 1;
     } else {
       right = middle - 1;
     }
   }
 
-  return isValidNumber(result)
-    ? Number(result)
-    : null;
+  return toOhlc(result);
 }
 function removePortfolioOutliers(timeline) {
   if (
@@ -1097,14 +1090,11 @@ function removePortfolioOutliers(timeline) {
 function formatChartDate(timestamp) {
   return new Date(
     Number(timestamp) * 1000
-  ).toLocaleString(
+  ).toLocaleDateString(
     "zh-TW",
     {
       month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
+      day: "2-digit"
     }
   );
 }
@@ -1122,21 +1112,6 @@ function formatFullDate(timestamp) {
   );
 }
 
-function formatFullDateTime(timestamp) {
-  return new Date(
-    Number(timestamp) * 1000
-  ).toLocaleString(
-    "zh-TW",
-    {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    }
-  );
-}
 
 function formatCompactTwd(value) {
   const number =
@@ -1220,7 +1195,16 @@ function normalizeHistory(history) {
     // 避免同一時間重複資料
     unique.set(time, {
       time,
-      price
+      price,
+      open: isValidNumber(item?.open)
+        ? Number(item.open)
+        : price,
+      high: isValidNumber(item?.high)
+        ? Number(item.high)
+        : price,
+      low: isValidNumber(item?.low)
+        ? Number(item.low)
+        : price
     });
   }
 

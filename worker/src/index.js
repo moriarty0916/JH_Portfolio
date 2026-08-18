@@ -68,7 +68,7 @@ function normalizeHistory(timestamps, quote) {
 async function fetchYahooQuote(symbol) {
   const url =
     `https://query1.finance.yahoo.com/v8/finance/chart/` +
-    `${encodeURIComponent(symbol)}?interval=5m&range=5d`;
+    `${encodeURIComponent(symbol)}?interval=1d&range=6mo`;
 
   const response = await fetch(url, {
     headers: {
@@ -135,7 +135,7 @@ async function fetchYahooQuote(symbol) {
     marketState: meta.marketState || null,
     marketTime: meta.regularMarketTime || null,
     timezone: meta.timezone || null,
-    interval: meta.dataGranularity || "5m",
+    interval: meta.dataGranularity || "1d",
     historyCount: history.length,
     history
   };
